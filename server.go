@@ -50,11 +50,13 @@ func main() {
 	log.Fatalln(err)
 }
 
-func indexHandler(c *fiber.Ctx, db *sql.DB) error {
+func indexHandler(c *fiber.Ctx, db *sql.DB) (err error) {
 	var res string
 	var todos []string
 	rows, err := db.Query("SELECT * FROM todos")
-	defer rows.Close()
+	defer func() {
+		err = rows.Close()
+	}()
 	if err != nil {
 		log.Fatalln(err)
 		c.JSON("An error occured.")
