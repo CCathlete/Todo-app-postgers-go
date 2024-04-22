@@ -6,14 +6,16 @@ import (
 	"log"
 	"os"
 
+	_ "github.com/lib/pq"
+
 	fiber "github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
 )
 
 func main() {
-	connStr := "postgresql://postgres:postgres@127.0.0.1/5432/todoapp?sslmode=disable"
+	connStr := "postgresql://postgres:postgres@127.0.0.1:5432/todoapp?sslmode=disable"
 
-	engine := html.New("./views", "html")
+	engine := html.New("./views", ".html")
 	configuration := fiber.Config{
 		Views: engine,
 	}
@@ -44,14 +46,14 @@ func main() {
 		port = "3000"
 	}
 
-	app.Static("/", "./public")
+	app.Static("./public", "./public")
 	err = app.Listen(fmt.Sprintf(":%v", port))
 	log.Fatalln(err)
 }
 
 func indexHandler(c *fiber.Ctx, db *sql.DB) (err error) {
 	var res string
-	var todos []string
+	var todos = []string{}
 	rows, err := db.Query("SELECT * FROM todos")
 	defer func() {
 		err = rows.Close()
