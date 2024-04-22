@@ -23,8 +23,6 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	app = fiber.New()
-
 	app.Get("/", func(c *fiber.Ctx) error {
 		return indexHandler(c, db)
 	})
@@ -46,6 +44,7 @@ func main() {
 		port = "3000"
 	}
 
+	app.Static("/", "./public")
 	err = app.Listen(fmt.Sprintf(":%v", port))
 	log.Fatalln(err)
 }
