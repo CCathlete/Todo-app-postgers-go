@@ -71,14 +71,35 @@ func indexHandler(c *fiber.Ctx, db *sql.DB) (err error) {
 	})
 }
 
+type todo struct {
+	Item string
+}
+
 func postHandler(c *fiber.Ctx, db *sql.DB) error {
-	return c.SendString("Hemlo")
+	newTodo := todo{}
+	if err := c.BodyParser(&newTodo); err != nil {
+		log.Printf("An error occured: %v", err)
+		return c.SendString(err.Error())
+	}
+	fmt.Printf("%v", newTodo)
+	if newTodo.Item != "" {
+		_, err := db.Exec("INSERT into todos VALUES ($1)", newTodo.Item)
+		if err != nil {
+			log.Fatalf("An error occured while executing query: %v", err)
+		}
+	}
+	return c.Redirect("/")
 }
 
 func putHandler(c *fiber.Ctx, db *sql.DB) error {
-	return c.SendString("Hemlo")
+	oldItem := c.Query("olditem")
+	newItem := c.Query("newitem")
+	db.Exec("UPDATE todos SET item=$1 WHERE item=$2", newItem, oldItem)
+	return c.Redirect("/")
 }
 
 func deleteHandler(c *fiber.Ctx, db *sql.DB) error {
-	return c.SendString("Hemlo")
+	todoToDelete := c.Query("item")
+	db.Exec("DELETE from todos WHERE item=$1", todoToDelete)
+	return c.SendString("deleted")
 }
